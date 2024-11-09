@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Classic Brew - Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Brown Color Theme */
+    :root {
+        --dark-brown: #4e342e;
+        --brown: #6d4c41;
+        --light-brown: #8d6e63;
+        --cream: #f4e1d2;
+        --background: #fafafa;
+        --welcome-bg: url('https://images5.alphacoders.com/545/545747.jpg'); /* Welcome image */
+        --dashboard-bg: url('coffee.jpg'); /* Dashboard image */
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: var(--background);
+        color: var(--dark-brown);
+        margin: 0;
+        padding: 0px;
+        display: flex;
+    }
+
+    .header-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: var(--dark-brown);
+        z-index: 20;
+        padding: 10px 0;
+    }
+
+    .nav-menu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-menu ul li {
+        margin: 0 15px;
+    }
+
+    .nav-menu ul li a {
+        color: var(--cream);
+        text-decoration: none;
+        font-size: 1.2em;
+    }
+
+    .nav-menu ul li a:hover {
+        text-decoration: underline;
+    }
+
+    h1 {
+        color: var(--cream);
+        text-align: center;
+        font-size: 2em;
+        margin-bottom: 20px;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Sidebar Styling */
+    .sidebar {
+        width: 208px;
+        padding: 30px 20px;
+        padding-top: 130px;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        background-color: var(--light-brown);
+        background: linear-gradient(to bottom, rgba(140, 110, 95, 0.85), rgba(120, 90, 75, 0.9)); /* Subtle gradient */
+        border-right: 2px solid var(--brown);
+        display: flex;
+        flex-direction: column;
+        z-index: 10;
+        height: 100vh;
+        overflow: auto;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+        border-radius: 10px 0 0 10px; /* Rounded corners for the left side */
+    }
+
+    .sidebar h2 {
+        color: var(--cream);
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        font-weight: bold;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+
+    .sidebar select, .sidebar button {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        border: 1px solid var(--brown);
+        border-radius: 8px;
+        background-color: var(--cream);
+        font-size: 1.1em;
+        color: var(--dark-brown);
+        transition: all 0.3s ease;
+    }
+
+    .sidebar select:hover, .sidebar button:hover {
+        background-color: var(--brown);
+        color: var(--cream);
+        border-color: var(--cream);
+    }
+
+    .sidebar select option, .sidebar button {
+        font-size: 1.1em;
+    }
+
+    /* Add a subtle hover effect on the options */
+    .sidebar select, .sidebar button {
+        cursor: pointer;
+    }
+
+    /* Additional padding to prevent the content from being too close to the sidebar edges */
+    .sidebar .sidebar-content {
+        padding-top: 20px;
+    }
+
+    /* Content Styling */
+    .content {
+        flex-grow: 1;
+        padding: 20px;
+        padding-top: 103px;
+        margin-left: 250px; /* Leaves space for sidebar */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-image: var(--welcome-bg); /* Set your welcome image */
+        background-size: cover; 
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 80vh;
+        opacity: 0.9;
+        text-align: center;
+    }
+
+    /* Welcome Message Styling */
+    .welcome-message {
+        color: var(--cream);  
+        font-size: 1.3em;  
+        font-weight: bold;
+        line-height: 1;  /* Adds space between lines for better readability */
+        text-align: center;
+        margin: 50px 0;  /* Spacing around the message */
+        padding: 20px 30px;
+        background: rgba(255, 255, 255, 0.8);  
+        border-radius: 12px;  
+        backdrop-filter: blur(8px);  /* Frosted glass effect */
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);  
+        width: 70%; 
+        max-width: 800px;  /* Limit the maximum width to prevent text from stretching too much */
+        z-index: 10;  /* Ensure it's on top of the background */
+        font-family: 'Playfair Display', serif;  
+    }
+
+    /* Additional Styling for the Title */
+    .welcome-message h4 {
+        font-size: 2.5em;
+        font-weight: 600;
+        margin-bottom: 20px;  /* Space between title and the body text */
+        color: var(--dark-brown);  
+        text-transform: uppercase;  
+    }
+
+    /* Subtitle Styling */
+    .welcome-message h5 {
+        font-size: 1.5em;
+        font-weight: 400;
+        color: var(--dark-brown);
+        opacity: 0.85;  
+        margin-top: 10px;  /* Adds space between subtitle and title */
+    }
+
+    /* Grid Layout for Dashboard */
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        padding-top: 50px;
+        flex-grow: 1;
+        display: none; /* Hidden until data is loaded */
+        width: 100%;
+        z-index: 1; /* Ensures dashboard sections are on top of the background */
+    }
+
+    .dashboard-section {
+        background-color: rgba(244, 225, 210, 0.91);
+        border: 1px solid var(--light-brown);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        position: relative;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .dashboard-section:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <h1>The Classic Brew - Data Dashboard</h1>
+        <nav class="nav-menu">
+        <ul>
+            <li><a href="midtermlab.html">Home</a></li>
+            <li><a href="#settings">Settings</a></li>
+            <li><a href="#help">Help</a></li>
+        </ul>
+    </nav>
+    </div>
+</header>
+
+<div class="sidebar">
+    <h2>Select Store and Month</h2>
+    <select id="storeSelect">
+        <option value="cavite">Cavite City</option>
+        <option value="makati">Makati City</option>
+        <option value="quezon">Quezon City</option>
+        <option value="baguio">Baguio City</option>
+    </select>
+    <select id="monthSelect">
+        <option value="january">January</option>
+        <option value="february">February</option>
+        <option value="march">March</option>
+        <option value="april">April</option>
+        <option value="may">May</option>
+        <option value="june">June</option>
+        <option value="july">July</option>
+        <option value="august">August</option>
+        <option value="september">September</option>
+        <option value="october">October</option>
+        <option value="november">November</option>
+        <option value="december">December</option>
+    </select>
+    <button onclick="loadDashboardData()">Load Data</button>
+</div>
+
+<div class="content">
+    <div class="welcome-message">
+        <h4>Welcome to The Classic Brew Dashboard! </h4>
+        <h5>Please select a store and month to load the data.</h5>
+    </div>
+    <div class="dashboard-container" id="dashboard-container">
+        <!-- Dashboard sections will be populated here after data load -->
+    </div>
+</div>
+
+<script>
+    function loadDashboardData() {
+        const store = document.getElementById('storeSelect').value;
+        const month = document.getElementById('monthSelect').value;
+
+        console.log(`Store: ${store}, Month: ${month}`);
+
+        // Hide the welcome message and show the dashboard container
+        document.querySelector('.welcome-message').style.display = 'none';
+        document.querySelector('.dashboard-container').style.display = 'grid';
+
+        // Change the background image of the dashboard
+        document.querySelector('.content').style.backgroundImage = "url('coffee.jpg')"; 
+    
+        // Mock data for demonstration
+        const mockData = {
+            //Store 1
+            cavite: {
+                january: {
+                    totalRevenue: 5000,
+                    customerSatisfaction: 8,
+                    transactionsByDay: [9, 16, 10, 5, 12, 25, 22],
+                    transactionsByHour: [17, 10, 12, 22, 30, 21, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 100,
+                        "Iced Coffees": 200,
+                        "Frappes": 250,
+                        "Pastries": 100
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 180,
+                        "Credit Card": 130,
+                        "Mobile Payments": 90,
+                        "Digital Wallets": 60
+                    },             
+                    reservations: 20,
+                    productPopularity: [10, 30, 20, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 120,
+                        "New Customers": 80
+                    }
+                },
+                february: {
+                    totalRevenue: 6000,
+                    customerSatisfaction: 9.5,
+                    transactionsByDay: [10, 15, 20, 5, 12, 25, 30],
+                    transactionsByHour: [5, 10, 30, 20, 5, 25, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 150,
+                        "Iced Coffees": 200,
+                        "Frappes": 150,
+                        "Pastries": 150
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 190,
+                        "Credit Card": 140,
+                        "Mobile Payments": 110,
+                        "Digital Wallets": 55
+                    },
+                    reservations: 13,
+                    productPopularity: [35, 25, 20, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 130,
+                        "New Customers": 70
+                    }
+                },
+                march: {
+                    totalRevenue: 12000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [10, 15, 20, 5, 12, 25, 30],
+                    transactionsByHour: [5, 10, 15, 20, 30, 25, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 300,
+                        "Iced Coffees": 200,
+                        "Frappes": 150,
+                        "Pastries": 100
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 210,
+                        "Credit Card": 160,
+                        "Mobile Payments": 95,
+                        "Digital Wallets": 70
+                    },
+                    reservations: 10,
+                    productPopularity: [35, 25, 20, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 140,
+                        "New Customers": 60
+                    }
+                },
+                april: {
+                    totalRevenue: 15000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [12, 18, 22, 7, 15, 28, 35],
+                    transactionsByHour: [10, 15, 20, 25, 30, 35, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 400,
+                        "Iced Coffees": 300,
+                        "Frappes": 200,
+                        "Pastries": 200
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 175,
+                        "Credit Card": 125,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 65
+                    },
+                    reservations: 20,
+                    productPopularity: [40, 30, 25, 15],
+                    customerLoyalty: {
+                        "Loyal Customers": 150,
+                        "New Customers": 50
+                    }
+                },
+                may: {
+                    totalRevenue: 14000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [12, 20, 22, 10, 18, 30, 32],
+                    transactionsByHour: [15, 20, 25, 30, 35, 20, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 450,
+                        "Iced Coffees": 300,
+                        "Frappes": 250,
+                        "Pastries": 150
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 220,
+                        "Credit Card": 150,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 80
+                    },
+                    reservations: 15,
+                    productPopularity: [45, 25, 15, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 160,
+                        "New Customers": 40
+                    }
+                },
+                june: {
+                    totalRevenue: 16000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [15, 25, 20, 10, 18, 27, 30],
+                    transactionsByHour: [20, 25, 30, 35, 25, 30, 20],
+                    transactionsByCategory: {
+                        "Hot Drinks": 500,
+                        "Iced Coffees": 400,
+                        "Frappes": 200,
+                        "Pastries": 100
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 205,
+                        "Credit Card": 135,
+                        "Mobile Payments": 100,
+                        "Digital Wallets": 75
+                    },
+                    reservations: 10,
+                    productPopularity: [50, 40, 20, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 170,
+                        "New Customers": 30
+                    }
+                },
+                july: {
+                    totalRevenue: 18000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [20, 28, 15, 12, 18, 30, 25],
+                    transactionsByHour: [30, 35, 40, 20, 25, 15, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 550,
+                        "Iced Coffees": 450,
+                        "Frappes": 250,
+                        "Pastries": 200
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 215,
+                        "Credit Card": 145,
+                        "Mobile Payments": 120,
+                        "Digital Wallets": 85
+                    },
+                    reservations: 25,
+                    productPopularity: [55, 45, 30, 20],
+                    customerLoyalty: {
+                        "Loyal Customers": 180,
+                        "New Customers": 20
+                    }
+                },
+                august: {
+                    totalRevenue: 19000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [25, 30, 20, 15, 10, 25, 30],
+                    transactionsByHour: [30, 40, 50, 20, 30, 25, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 600,
+                        "Iced Coffees": 500,
+                        "Frappes": 200,
+                        "Pastries": 100
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 190,
+                        "Credit Card": 160,
+                        "Mobile Payments": 110,
+                        "Digital Wallets": 65
+                    },
+                    reservations: 20,
+                    productPopularity: [60, 50, 25, 15],
+                    customerLoyalty: {
+                        "Loyal Customers": 190,
+                        "New Customers": 10
+                    }
+                },
+                september: {
+                    totalRevenue: 20000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [30, 35, 25, 20, 15, 30, 35],
+                    transactionsByHour: [35, 45, 50, 30, 25, 20, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 650,
+                        "Iced Coffees": 550,
+                        "Frappes": 300,
+                        "Pastries": 200
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 200,
+                        "Credit Card": 155,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 75
+                    },
+                    reservations: 30,
+                    productPopularity: [65, 55, 30, 20],
+                    customerLoyalty: {
+                        "Loyal Customers": 200,
+                        "New Customers": 15
+                    }
+                },
+                october: {
+                    totalRevenue: 21000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [35, 40, 30, 25, 20, 35, 40],
+                    transactionsByHour: [40, 50, 55, 35, 30, 25, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 700,
+                        "Iced Coffees": 600,
+                        "Frappes": 400,
+                        "Pastries": 250
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 185,
+                        "Credit Card": 165,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 90
+                    },
+                    reservations: 20,
+                    productPopularity: [70, 60, 30, 25],
+                    customerLoyalty: {
+                        "Loyal Customers": 210,
+                        "New Customers": 25
+                    }
+                },
+                november: {
+                    totalRevenue: 22000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [40, 45, 35, 30, 25, 40, 45],
+                    transactionsByHour: [45, 55, 60, 40, 35, 30, 20],
+                    transactionsByCategory: {
+                        "Hot Drinks": 750,
+                        "Iced Coffees": 650,
+                        "Frappes": 500,
+                        "Pastries": 300
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 195,
+                        "Credit Card": 170,
+                        "Mobile Payments": 130,
+                        "Digital Wallets": 85
+                    },
+                    reservations: 18,
+                    productPopularity: [75, 65, 35, 30],
+                    customerLoyalty: {
+                        "Loyal Customers": 220,
+                        "New Customers": 35
+                    }
+                },
+                december: {
+                    totalRevenue: 25000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [50, 55, 45, 40, 35, 50, 55],
+                    transactionsByHour: [50, 60, 70, 50, 45, 40, 30],
+                    transactionsByCategory: {
+                        "Hot Drinks": 800,
+                        "Iced Coffees": 700,
+                        "Frappes": 600,
+                        "Pastries": 400
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 225,
+                        "Credit Card": 175,
+                        "Mobile Payments": 120,
+                        "Digital Wallets": 95
+                    },
+                    reservations: 12,
+                    productPopularity: [80, 70, 40, 35],
+                    customerLoyalty: {
+                        "Loyal Customers": 230,
+                        "New Customers": 45
+                    }
+                }
+            },
+
+            //Store 2
+            makati: {
+                january: {
+                    totalRevenue: 4800,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [12, 14, 8, 6, 10, 20, 15],
+                    transactionsByHour: [15, 12, 10, 20, 18, 25, 8],
+                    transactionsByCategory: {
+                        "Hot Drinks": 90,
+                        "Iced Coffees": 180,
+                        "Frappes": 240,
+                        "Pastries": 90
+                    },
+                     transactionsByPaymentMethod: {
+                        "Cash": 180,
+                        "Credit Card": 150,
+                        "Mobile Payments": 100,
+                        "Digital Wallets": 60
+                    },
+                    reservations: 15,
+                    productPopularity: [12, 28, 25, 15],
+                    customerLoyalty: {
+                        "Loyal Customers": 240,
+                        "New Customers": 55
+                    }
+                },
+                february: {
+                    totalRevenue: 5500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [15, 18, 22, 7, 10, 30, 32],
+                    transactionsByHour: [6, 15, 35, 18, 22, 27, 11],
+                    transactionsByCategory: {
+                        "Hot Drinks": 160,
+                        "Iced Coffees": 220,
+                        "Frappes": 140,
+                        "Pastries": 130
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 190,
+                        "Credit Card": 140,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 70
+                    },
+                    reservations: 25,
+                    productPopularity: [30, 20, 25, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 250,
+                        "New Customers": 65
+                    }
+                },
+                march: {
+                    totalRevenue: 11500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [11, 19, 20, 6, 15, 24, 29],
+                    transactionsByHour: [8, 12, 22, 19, 29, 30, 20],
+                    transactionsByCategory: {
+                        "Hot Drinks": 320,
+                        "Iced Coffees": 230,
+                        "Frappes": 170,
+                        "Pastries": 90
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 210,
+                        "Credit Card": 165,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 80
+                    },
+                    reservations: 15,
+                    productPopularity: [35, 30, 20, 5],
+                    customerLoyalty: {
+                        "Loyal Customers": 260,
+                        "New Customers": 75
+                    }
+                },
+                april: {
+                    totalRevenue: 12500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [10, 20, 25, 5, 12, 20, 30],
+                    transactionsByHour: [7, 11, 15, 21, 33, 30, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 280,
+                        "Iced Coffees": 250,
+                        "Frappes": 200,
+                        "Pastries": 120
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 200,
+                        "Credit Card": 155,
+                        "Mobile Payments": 95,
+                        "Digital Wallets": 75
+                    },
+                    reservations: 10,
+                    productPopularity: [40, 20, 15, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 270,
+                        "New Customers": 85
+                    }
+                },
+                may: {
+                    totalRevenue: 13000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [15, 18, 22, 9, 17, 29, 27],
+                    transactionsByHour: [12, 17, 23, 20, 30, 22, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 350,
+                        "Iced Coffees": 280,
+                        "Frappes": 220,
+                        "Pastries": 140
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 225,
+                        "Credit Card": 175,
+                        "Mobile Payments": 125,
+                        "Digital Wallets": 85
+                    },
+                    reservations: 15,
+                    productPopularity: [45, 25, 20, 5],
+                    customerLoyalty: {
+                        "Loyal Customers": 280,
+                        "New Customers": 95
+                    }
+                },
+                june: {
+                    totalRevenue: 15500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [16, 22, 28, 6, 14, 25, 30],
+                    transactionsByHour: [22, 30, 25, 15, 35, 28, 20],
+                    transactionsByCategory: {
+                        "Hot Drinks": 400,
+                        "Iced Coffees": 320,
+                        "Frappes": 250,
+                        "Pastries": 150
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 195,
+                        "Credit Card": 145,
+                        "Mobile Payments": 110,
+                        "Digital Wallets": 65
+                    },
+                    reservations: 21,
+                    productPopularity: [50, 35, 25, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 290,
+                        "New Customers": 100
+                    }
+                },
+                july: {
+                    totalRevenue: 17500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [20, 30, 25, 15, 13, 27, 23],
+                    transactionsByHour: [30, 40, 35, 20, 30, 25, 18],
+                    transactionsByCategory: {
+                        "Hot Drinks": 450,
+                        "Iced Coffees": 350,
+                        "Frappes": 280,
+                        "Pastries": 160
+                    },
+                     transactionsByPaymentMethod: {
+                        "Cash": 215,
+                        "Credit Card": 155,
+                        "Mobile Payments": 120,
+                        "Digital Wallets": 70
+                    },
+                    reservations: 15,
+                    productPopularity: [55, 40, 25, 15],
+                    customerLoyalty: {
+                        "Loyal Customers": 300,
+                        "New Customers": 105
+                    }
+                },
+                august: {
+                    totalRevenue: 18500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [25, 20, 15, 10, 5, 30, 35],
+                    transactionsByHour: [35, 45, 50, 25, 30, 15, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 480,
+                        "Iced Coffees": 420,
+                        "Frappes": 290,
+                        "Pastries": 170
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 200,
+                        "Credit Card": 160,
+                        "Mobile Payments": 130,
+                        "Digital Wallets": 95
+                    },
+                    reservations: 21,
+                    productPopularity: [60, 45, 30, 20],
+                    customerLoyalty: {
+                        "Loyal Customers": 310,
+                        "New Customers": 110
+                    }
+                },
+                september: {
+                    totalRevenue: 19500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [30, 35, 30, 20, 15, 40, 45],
+                    transactionsByHour: [45, 55, 60, 35, 30, 25, 20],
+                    transactionsByCategory: {
+                        "Hot Drinks": 510,
+                        "Iced Coffees": 470,
+                        "Frappes": 310,
+                        "Pastries": 180
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 210,
+                        "Credit Card": 150,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 85
+                    },
+                    reservations: 25,
+                    productPopularity: [65, 50, 35, 25],
+                    customerLoyalty: {
+                        "Loyal Customers": 320,
+                        "New Customers": 115
+                    }
+                },
+                october: {
+                    totalRevenue: 21000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [35, 40, 30, 25, 20, 30, 40],
+                    transactionsByHour: [50, 60, 70, 45, 35, 30, 25],
+                    transactionsByCategory: {
+                        "Hot Drinks": 540,
+                        "Iced Coffees": 490,
+                        "Frappes": 330,
+                        "Pastries": 200
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 205,
+                        "Credit Card": 170,
+                        "Mobile Payments": 125,
+                        "Digital Wallets": 100
+                    },
+                    reservations: 23,
+                    productPopularity: [70, 60, 40, 35],
+                    customerLoyalty: {
+                        "Loyal Customers": 330,
+                        "New Customers": 120
+                    }
+                },
+                november: {
+                    totalRevenue: 22000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [40, 45, 35, 30, 25, 40, 50],
+                    transactionsByHour: [55, 65, 80, 50, 40, 35, 30],
+                    transactionsByCategory: {
+                        "Hot Drinks": 570,
+                        "Iced Coffees": 520,
+                        "Frappes": 360,
+                        "Pastries": 210
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 190,
+                        "Credit Card": 145,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 75
+                    },
+                    reservations: 22,
+                    productPopularity: [75, 65, 45, 30],
+                    customerLoyalty: {
+                        "Loyal Customers": 340,
+                        "New Customers": 125
+                    }
+                },
+                december: {
+                    totalRevenue: 26000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [50, 55, 45, 40, 35, 50, 60],
+                    transactionsByHour: [60, 75, 90, 60, 50, 40, 35],
+                    transactionsByCategory: {
+                        "Hot Drinks": 600,
+                        "Iced Coffees": 550,
+                        "Frappes": 400,
+                        "Pastries": 250
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 220,
+                        "Credit Card": 165,
+                        "Mobile Payments": 130,
+                        "Digital Wallets": 95
+                    },
+                    reservations: 19,
+                    productPopularity: [80, 70, 50, 35],
+                    customerLoyalty: {
+                        "Loyal Customers": 350,
+                        "New Customers": 130
+                    }
+                }
+            },
+
+
+            // Store 3
+            quezon: {
+                january: {
+                    totalRevenue: 5200,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [10, 15, 10, 5, 12, 28, 20],
+                    transactionsByHour: [18, 11, 14, 22, 27, 30, 9],
+                    transactionsByCategory: {
+                        "Hot Drinks": 110,
+                        "Iced Coffees": 190,
+                        "Frappes": 240,
+                        "Pastries": 110
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 210,
+                        "Credit Card": 130,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 55
+                    },
+                    reservations: 25,
+                    productPopularity: [15, 25, 20, 15],
+                    customerLoyalty: {
+                        "Loyal Customers": 110,
+                        "New Customers": 90
+                    }
+                },
+                february: {
+                    totalRevenue: 6200,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [12, 14, 20, 6, 15, 25, 30],
+                    transactionsByHour: [8, 12, 30, 20, 15, 25, 12],
+                    transactionsByCategory: {
+                        "Hot Drinks": 170,
+                        "Iced Coffees": 230,
+                        "Frappes": 160,
+                        "Pastries": 130
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 170,
+                        "Credit Card": 120,
+                        "Mobile Payments": 125,
+                        "Digital Wallets": 90
+                    },
+                    reservations: 30,
+                    productPopularity: [30, 25, 15, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 115,
+                        "New Customers": 85
+                    }
+                },
+                march: {
+                    totalRevenue: 12500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [8, 12, 19, 7, 12, 22, 30],
+                    transactionsByHour: [6, 10, 22, 20, 29, 26, 18],
+                    transactionsByCategory: {
+                        "Hot Drinks": 290,
+                        "Iced Coffees": 210,
+                        "Frappes": 180,
+                        "Pastries": 90
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 160,
+                        "Credit Card": 150,
+                        "Mobile Payments": 110,
+                        "Digital Wallets": 100
+                    },
+                    reservations: 25,
+                    productPopularity: [35, 30, 25, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 120,
+                        "New Customers": 80
+                    }
+                },
+                april: {
+                    totalRevenue: 14000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [11, 19, 22, 8, 15, 26, 30],
+                    transactionsByHour: [9, 14, 20, 28, 36, 32, 20],
+                    transactionsByCategory: {
+                        "Hot Drinks": 360,
+                        "Iced Coffees": 280,
+                        "Frappes": 220,
+                        "Pastries": 150
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 220,
+                        "Credit Card": 130,
+                        "Mobile Payments": 95,
+                        "Digital Wallets": 80
+                    },
+                    reservations: 22,
+                    productPopularity: [40, 20, 15, 15],
+                    customerLoyalty: {
+                        "Loyal Customers": 125,
+                        "New Customers": 75
+                    }
+                },
+                may: {
+                    totalRevenue: 14500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [12, 15, 24, 9, 16, 29, 30],
+                    transactionsByHour: [10, 15, 20, 35, 30, 28, 12],
+                    transactionsByCategory: {
+                        "Hot Drinks": 400,
+                        "Iced Coffees": 310,
+                        "Frappes": 250,
+                        "Pastries": 120
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 240,
+                        "Credit Card": 175,
+                        "Mobile Payments": 100,
+                        "Digital Wallets": 75
+                    },
+                    reservations: 17,
+                    productPopularity: [50, 25, 20, 5],
+                    customerLoyalty: {
+                        "Loyal Customers": 130,
+                        "New Customers": 70
+                    }
+                },
+                june: {
+                    totalRevenue: 16000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [15, 22, 26, 7, 13, 30, 35],
+                    transactionsByHour: [20, 25, 30, 35, 28, 22, 18],
+                    transactionsByCategory: {
+                        "Hot Drinks": 430,
+                        "Iced Coffees": 320,
+                        "Frappes": 260,
+                        "Pastries": 140
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 180,
+                        "Credit Card": 125,
+                        "Mobile Payments": 120,
+                        "Digital Wallets": 95
+                    },
+                    reservations: 8,
+                    productPopularity: [55, 30, 25, 15],
+                    customerLoyalty: {
+                        "Loyal Customers": 135,
+                        "New Customers": 65
+                    }
+                },
+                july: {
+                    totalRevenue: 17500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [20, 28, 30, 16, 12, 25, 27],
+                    transactionsByHour: [30, 35, 40, 25, 20, 18, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 460,
+                        "Iced Coffees": 350,
+                        "Frappes": 280,
+                        "Pastries": 160
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 190,
+                        "Credit Card": 150,
+                        "Mobile Payments": 130,
+                        "Digital Wallets": 70
+                    },
+                    reservations: 5,
+                    productPopularity: [60, 40, 30, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 140,
+                        "New Customers": 60
+                    },
+                },
+                august: {
+                    totalRevenue: 18500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [25, 30, 20, 18, 12, 22, 15],
+                    transactionsByHour: [35, 45, 50, 30, 20, 15, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 490,
+                        "Iced Coffees": 430,
+                        "Frappes": 290,
+                        "Pastries": 170
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 210,
+                        "Credit Card": 160,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 65
+                    },
+                    reservations: 15,
+                    productPopularity: [65, 45, 35, 20],
+                    customerLoyalty: {
+                        "Loyal Customers": 145,
+                        "New Customers": 55
+                    }
+                },
+                september: {
+                    totalRevenue: 19500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [30, 35, 28, 20, 15, 40, 45],
+                    transactionsByHour: [45, 55, 60, 30, 25, 20, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 510,
+                        "Iced Coffees": 480,
+                        "Frappes": 310,
+                        "Pastries": 180
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 200,
+                        "Credit Card": 140,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 80
+                    },
+                    reservations: 16,
+                    productPopularity: [70, 60, 40, 25],
+                    customerLoyalty: {
+                        "Loyal Customers": 150,
+                        "New Customers": 50
+                    }
+                },
+                october: {
+                    totalRevenue: 22000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [40, 35, 30, 25, 20, 30, 35],
+                    transactionsByHour: [55, 65, 75, 40, 30, 25, 20],
+                    transactionsByCategory: {
+                        "Hot Drinks": 550,
+                        "Iced Coffees": 510,
+                        "Frappes": 340,
+                        "Pastries": 200
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 215,
+                        "Credit Card": 155,
+                        "Mobile Payments": 110,
+                        "Digital Wallets": 70
+                    },
+                    reservations: 11,
+                    productPopularity: [75, 65, 45, 30],
+                    customerLoyalty: {
+                        "Loyal Customers": 155,
+                        "New Customers": 45
+                    }
+                },
+                november: {
+                    totalRevenue: 24000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [50, 45, 40, 35, 30, 50, 60],
+                    transactionsByHour: [60, 75, 90, 60, 50, 40, 35],
+                    transactionsByCategory: {
+                        "Hot Drinks": 600,
+                        "Iced Coffees": 550,
+                        "Frappes": 370,
+                        "Pastries": 210
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 225,
+                        "Credit Card": 165,
+                        "Mobile Payments": 120,
+                        "Digital Wallets": 95
+                    },
+                    reservations: 15,
+                    productPopularity: [80, 70, 50, 30],
+                    customerLoyalty: {
+                        "Loyal Customers": 160,
+                        "New Customers": 40
+                    }
+                },
+                december: {
+                    totalRevenue: 26000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [60, 65, 50, 45, 40, 55, 70],
+                    transactionsByHour: [70, 85, 100, 70, 60, 50, 40],
+                    transactionsByCategory: {
+                        "Hot Drinks": 630,
+                        "Iced Coffees": 570,
+                        "Frappes": 420,
+                        "Pastries": 250
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 230,
+                        "Credit Card": 145,
+                        "Mobile Payments": 125,
+                        "Digital Wallets": 85
+                    },
+                    reservations: 10,
+                    productPopularity: [85, 75, 55, 35],
+                    customerLoyalty: {
+                        "Loyal Customers": 165,
+                        "New Customers": 35
+                    }
+                }
+            },
+
+        //Store 4
+            baguio: {
+                january: {
+                    totalRevenue: 4800,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [8, 12, 14, 10, 6, 15, 20],
+                    transactionsByHour: [15, 10, 20, 25, 30, 18, 5],
+                    transactionsByCategory: {
+                        "Hot Drinks": 90,
+                        "Iced Coffees": 150,
+                        "Frappes": 120,
+                        "Pastries": 80
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 205,
+                        "Credit Card": 150,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 60
+                    },
+                    reservations: 10,
+                    productPopularity: [15, 25, 15, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 170,
+                        "New Customers": 30
+                    }
+                },
+                february: {
+                    totalRevenue: 5200,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [10, 14, 18, 8, 12, 20, 22],
+                    transactionsByHour: [10, 15, 25, 20, 18, 30, 12],
+                    transactionsByCategory: {
+                        "Hot Drinks": 110,
+                        "Iced Coffees": 170,
+                        "Frappes": 140,
+                        "Pastries": 90
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 185,
+                        "Credit Card": 140,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 75
+                    },
+                    reservations: 10,
+                    productPopularity: [20, 20, 10, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 175,
+                        "New Customers": 25
+                    }
+                },
+                march: {
+                    totalRevenue: 13500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [12, 16, 22, 10, 14, 25, 30],
+                    transactionsByHour: [20, 18, 22, 26, 30, 25, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 280,
+                        "Iced Coffees": 200,
+                        "Frappes": 180,
+                        "Pastries": 120
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 210,
+                        "Credit Card": 125,
+                        "Mobile Payments": 95,
+                        "Digital Wallets": 80
+                    },
+                    reservations: 22,
+                    productPopularity: [35, 30, 25, 20],
+                    customerLoyalty: {
+                        "Loyal Customers": 180,
+                        "New Customers": 20
+                    }
+                },
+                april: {
+                    totalRevenue: 16000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [14, 20, 28, 10, 12, 24, 30],
+                    transactionsByHour: [30, 25, 30, 20, 35, 32, 22],
+                    transactionsByCategory: {
+                        "Hot Drinks": 320,
+                        "Iced Coffees": 280,
+                        "Frappes": 240,
+                        "Pastries": 160
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 220,
+                        "Credit Card": 155,
+                        "Mobile Payments": 120,
+                        "Digital Wallets": 85
+                    },
+                    reservations: 5,
+                    productPopularity: [40, 30, 20, 10],
+                    customerLoyalty: {
+                        "Loyal Customers": 185,
+                        "New Customers": 15
+                    }
+                },
+                may: {
+                    totalRevenue: 17000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [20, 25, 30, 15, 12, 22, 18],
+                    transactionsByHour: [25, 30, 40, 35, 20, 15, 10],
+                    transactionsByCategory: {
+                        "Hot Drinks": 350,
+                        "Iced Coffees": 300,
+                        "Frappes": 250,
+                        "Pastries": 180
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 200,
+                        "Credit Card": 140,
+                        "Mobile Payments": 130,
+                        "Digital Wallets": 65
+                    },
+                    reservations: 11,
+                    productPopularity: [50, 40, 30, 20],
+                    customerLoyalty: {
+                        "Loyal Customers": 190,
+                        "New Customers": 10
+                    }
+                },
+                june: {
+                    totalRevenue: 19000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [25, 30, 22, 18, 15, 28, 20],
+                    transactionsByHour: [35, 40, 50, 45, 30, 28, 15],
+                    transactionsByCategory: {
+                        "Hot Drinks": 400,
+                        "Iced Coffees": 330,
+                        "Frappes": 270,
+                        "Pastries": 200
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 195,
+                        "Credit Card": 160,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 90
+                    },
+                    reservations: 23,
+                    productPopularity: [55, 45, 35, 25],
+                    customerLoyalty: {
+                        "Loyal Customers": 195,
+                        "New Customers": 5
+                    }
+                },
+                july: {
+                    totalRevenue: 21000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [30, 35, 28, 20, 25, 32, 30],
+                    transactionsByHour: [45, 50, 60, 55, 40, 35, 30],
+                    transactionsByCategory: {
+                        "Hot Drinks": 470,
+                        "Iced Coffees": 370,
+                        "Frappes": 300,
+                        "Pastries": 230
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 225,
+                        "Credit Card": 135,
+                        "Mobile Payments": 100,
+                        "Digital Wallets": 80
+                    },
+                    reservations: 12,
+                    productPopularity: [60, 50, 40, 30],
+                    customerLoyalty: {
+                        "Loyal Customers": 200,
+                        "New Customers": 0
+                    }
+                },
+                august: {
+                    totalRevenue: 22500,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [40, 45, 30, 35, 20, 30, 25],
+                    transactionsByHour: [50, 60, 70, 65, 50, 45, 35],
+                    transactionsByCategory: {
+                        "Hot Drinks": 500,
+                        "Iced Coffees": 420,
+                        "Frappes": 340,
+                        "Pastries": 250
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 205,
+                        "Credit Card": 160,
+                        "Mobile Payments": 120,
+                        "Digital Wallets": 90
+                    },
+                    reservations: 23,
+                    productPopularity: [65, 60, 50, 40],
+                    customerLoyalty: {
+                        "Loyal Customers": 210,
+                        "New Customers": 10
+                    }
+                },
+                september: {
+                    totalRevenue: 24000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [50, 55, 40, 35, 30, 45, 60],
+                    transactionsByHour: [60, 75, 80, 70, 60, 55, 40],
+                    transactionsByCategory: {
+                        "Hot Drinks": 550,
+                        "Iced Coffees": 490,
+                        "Frappes": 360,
+                        "Pastries": 280
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 215,
+                        "Credit Card": 145,
+                        "Mobile Payments": 110,
+                        "Digital Wallets": 95
+                    },
+                    reservations: 15,
+                    productPopularity: [70, 65, 55, 45],
+                    customerLoyalty: {
+                        "Loyal Customers": 220,
+                        "New Customers": 20
+                    }
+                },
+                october: {
+                    totalRevenue: 26000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [55, 60, 50, 40, 35, 45, 50],
+                    transactionsByHour: [70, 85, 90, 80, 70, 60, 50],
+                    transactionsByCategory: {
+                        "Hot Drinks": 600,
+                        "Iced Coffees": 520,
+                        "Frappes": 370,
+                        "Pastries": 300
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 200,
+                        "Credit Card": 175,
+                        "Mobile Payments": 105,
+                        "Digital Wallets": 85
+                    },
+                    reservations: 25,
+                    productPopularity: [75, 70, 60, 50],
+                    customerLoyalty: {
+                        "Loyal Customers": 230,
+                        "New Customers": 30
+                    }
+                },
+                november: {
+                    totalRevenue: 28000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [60, 70, 55, 45, 40, 65, 75],
+                    transactionsByHour: [80, 90, 100, 85, 70, 60, 55],
+                    transactionsByCategory: {
+                        "Hot Drinks": 650,
+                        "Iced Coffees": 570,
+                        "Frappes": 400,
+                        "Pastries": 320
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 190,
+                        "Credit Card": 150,
+                        "Mobile Payments": 115,
+                        "Digital Wallets": 75
+                    },
+                    reservations: 30,
+                    productPopularity: [80, 75, 65, 55],
+                    customerLoyalty: {
+                        "Loyal Customers": 240,
+                        "New Customers": 40
+                    }
+                },
+                december: {
+                    totalRevenue: 30000,
+                    customerSatisfaction: 9,
+                    transactionsByDay: [65, 75, 60, 55, 50, 70, 80],
+                    transactionsByHour: [90, 110, 120, 100, 80, 70, 60],
+                    transactionsByCategory: {
+                        "Hot Drinks": 700,
+                        "Iced Coffees": 600,
+                        "Frappes": 450,
+                        "Pastries": 350
+                    },
+                    transactionsByPaymentMethod: {
+                        "Cash": 220,
+                        "Credit Card": 165,
+                        "Mobile Payments": 135,
+                        "Digital Wallets": 100
+                    },
+                    reservations: 20,
+                    productPopularity: [85, 80, 70, 60],
+                    customerLoyalty: {
+                        "Loyal Customers": 250,
+                        "New Customers": 50
+                    }
+                }
+            }
+        };
+
+            // Retrieve data for the selected store and month
+            const data = mockData[store][month];
+
+            // Clear existing charts
+            document.getElementById('dashboard-container').innerHTML = '';
+
+           // Total Revenue - Default max is 50,000
+            addDashboardSection('Total Revenue', data.totalRevenue, 'totalRevenue', 50000);
+
+            // Customer Reservations - Out of 50
+            addDashboardSection('Number of Reservations', data.reservations, 'reservations', 50);
+
+            // Customer Satisfaction - Out of 10
+            addDashboardSection('Satisfaction Rating', data.customerSatisfaction, 'customerSatisfaction', 10);
+
+            // Transactions by Day (Bar Chart)
+            addChartSection('Transactions by Day', 'dayChart', 'bar', ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], data.transactionsByDay);
+
+            // Transactions by Hour (Line Chart)
+            addChartSection('Transactions by Hour', 'hourChart', 'line', ['6 AM', '9 AM', '12 PM', '3 PM', '6 PM', '9 PM', '12 AM'], data.transactionsByHour);
+
+            // Transactions by Payment Method (Pie Chart)
+            addChartSection('Transactions Methods', 'paymentMethodChart', 'bar', Object.keys(data.transactionsByPaymentMethod), Object.values(data.transactionsByPaymentMethod));
+
+            // Transactions by Category (Pie Chart)
+            addChartSection('Transactions by Category', 'categoryChart', 'pie', Object.keys(data.transactionsByCategory), Object.values(data.transactionsByCategory));
+            
+            // Product Popularity (Doughnut Chart)
+            addChartSection('Product Popularity', 'popularityChart', 'doughnut', ['Hot Drinks', 'Iced Coffees', 'Frappes', 'Pastries'], data.productPopularity);
+
+            // Customer Loyalty (Doughnut Chart)
+            addChartSection('Customer Loyalty', 'loyaltyChart', 'doughnut', Object.keys(data.customerLoyalty), Object.values(data.customerLoyalty));
+        }
+
+        function addDashboardSection(title, value, type, max = 100) { 
+            const section = document.createElement('div');
+            section.className = 'dashboard-section';
+            
+            // Create the title
+            const titleElement = document.createElement('h2');
+            titleElement.innerHTML = title;
+            section.appendChild(titleElement);
+
+            // Create the line (styled div)
+            const line = document.createElement('div');
+            line.style.height = '2px'; 
+            line.style.backgroundColor = '#3e2723'; 
+            line.style.margin = '10px 0'; // Add margin around the line
+            line.style.width = '100%'; // Ensure the line spans the full width
+            section.appendChild(line);  // Add the custom line below the title
+                    
+            // Create and append the canvas
+            const canvas = document.createElement('canvas');
+            canvas.id = `${type}Chart`;
+            section.appendChild(canvas);
+
+            // Append the section to the dashboard
+            document.getElementById('dashboard-container').appendChild(section);
+
+            // Call the drawCircle function
+            drawCircle(canvas, value, max); // Pass the max value to drawCircle
+
+            // Add description (customize as needed)
+            const description = document.createElement('p');
+            description.innerHTML = `This chart represents the ${title.toLowerCase()} for the selected store and month.`;
+            section.appendChild(description);
+        }
+
+
+        function drawCircle(canvas, value, max = 100) { 
+            const ctx = canvas.getContext('2d');
+            const radius = 70;
+            canvas.width = 150;  
+            canvas.height = 150; 
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Draw background circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fillStyle = '#e0e0e0'; // Gray background
+            ctx.fill();
+
+            // Normalize value as a percentage of max
+            const percentage = Math.min(value / max, 1); // Ensure percentage caps at 100%
+
+            // Draw progress circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * percentage));
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = '#76c7c0'; // Progress color
+            ctx.stroke();
+
+            // Format the value for display (show 'k' for thousands)
+            let displayValue = value;
+            if (value > 50000) {
+                displayValue = (value / 1000).toFixed(1) + 'k'; // Format value to 'k' if over 50,000
+            }
+
+            // Draw value text (number)
+            ctx.fillStyle = '#333'; // Text color
+            ctx.font = '18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(displayValue, centerX, centerY + 10);
+        }
+
+
+
+
+        function addChartSection(title, chartId, chartType, labels, data) {
+            const section = document.createElement('div');
+            section.className = 'dashboard-section';
+
+            // Create the title and line
+            const titleElement = document.createElement('h2');
+            titleElement.innerHTML = title;
+            
+            // Create the line (using <hr> for simplicity, or a styled div)
+            const line = document.createElement('hr');
+            line.style.border = '1px solid #3e2723'; // Dark brown color 
+            line.style.margin = '10px 0'; // Add margin around the line
+
+            section.appendChild(titleElement);
+            section.appendChild(line);  // Add the line below the title
+            section.innerHTML += `<canvas id="${chartId}"></canvas>`;
+
+            // Add description (customize as needed)
+            const description = document.createElement('p');
+            description.innerHTML = `This chart provides insights on ${title.toLowerCase()} for the selected period.`;
+            section.appendChild(description);
+
+            document.getElementById('dashboard-container').appendChild(section);
+
+            const ctx = document.getElementById(chartId).getContext('2d');
+            const chart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: data,
+                        backgroundColor: ['#a1887f', '#8d6e63', '#6d4c41', '#5d4037', '#4e342e']
+                    }]
+                },
+                options: {
+                    plugins: {
+                        title: { display: true, text: title },
+                        legend: { position: 'top' },
+                        tooltip: { callbacks: { label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}` } }
+                    }
+                }
+            });
+        }
+</script>
+
+</body>
+</html>
